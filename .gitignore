@@ -1,0 +1,40 @@
+./__cmake
+./__cmake/*
+./build
+./build/*
+
+*.obj
+*.bak
+ffmpeg
+fflay
+ffprobe
+tags
+
+*.log
+
+############################## MacOS  ##############################
+.DS_Store
+._.DS_Store
+Thumbs.db
+
+############################## IDE    ##############################
+.vscode/
+
+# Object files
+*.o
+
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
