@@ -4,6 +4,7 @@
 ./build/*
 
 *.obj
+*.d
 *.bak
 ffmpeg
 fflay
