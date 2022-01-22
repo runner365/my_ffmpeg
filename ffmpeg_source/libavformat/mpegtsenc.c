@@ -40,20 +40,6 @@
 
 #define DVB_PRIVATE_NETWORK_START 0xff01
 
-static void trace_data(const unsigned char* data, int len, char* print_data) {
-    size_t print_len = 0;
-
-    for (size_t index = 0; index < ((len > 512) ? 512 : (size_t)len); index++) {
-        if ((index%16) == 0) {
-            print_len += sprintf(print_data + print_len, "\r\n");
-        }
-        
-        print_len += sprintf(print_data + print_len, " %02x", data[index]);
-    }
-    print_len += sprintf(print_data + print_len, "\r\n");
-    return;
-}
-
 /*********************************************/
 /* mpegts section writer */
 
@@ -147,7 +133,6 @@ static void mpegts_write_section(MpegTSSection *s, uint8_t *buf, int len)
     const unsigned char *buf_ptr;
     unsigned char *q;
     int first, b, len1, left;
-    char print_data[1024];
 
     crc = av_bswap32(av_crc(av_crc_get_table(AV_CRC_32_IEEE),
                             -1, buf, len - 4));
@@ -188,10 +173,8 @@ static void mpegts_write_section(MpegTSSection *s, uint8_t *buf, int len)
         if (left > 0)
             memset(q, 0xff, left);
 
-        //trace_data(packet, TS_PACKET_SIZE, print_data);
         s->write_packet(s, packet);
 
-        //av_log(NULL, AV_LOG_INFO, "%s\r\n", print_data);
         buf_ptr += len1;
         len     -= len1;
     }
@@ -653,14 +636,20 @@ static int mpegts_write_pmt(AVFormatContext *s, MpegTSService *service)
                 *q++ = 'C';
                 *q++ = '-';
                 *q++ = '1';
-            }
-            if (st->codecpar->codec_id==AV_CODEC_ID_VP8) {
+            } else if (st->codecpar->codec_id==AV_CODEC_ID_VP8) {
                 *q++ = 0x05; /*MPEG-2 registration descriptor*/
                 *q++ = 4;
                 *q++ = 'V';
                 *q++ = 'p';
                 *q++ = '8';
-                *q++ = ' ';
+                *q++ = '0';
+            } else if (st->codecpar->codec_id==AV_CODEC_ID_VP9) {
+                *q++ = 0x05; /*MPEG-2 registration descriptor*/
+                *q++ = 4;
+                *q++ = 'V';
+                *q++ = 'p';
+                *q++ = '9';
+                *q++ = '0';
             }
             break;
         case AVMEDIA_TYPE_DATA:
@@ -1454,13 +1443,6 @@ static void mpegts_write_pes(AVFormatContext *s, AVStream *st,
         payload      += len;
         payload_size -= len;
         mpegts_prefix_m2ts_header(s);
-
-        //do {
-        //    char print_data[4096];
-        //    
-        //    trace_data(buf, TS_PACKET_SIZE, print_data);
-        //    av_log(NULL, AV_LOG_INFO, "write mpegts pes.\r\n%s\r\n", print_data);
-        //} while(0);
         
         avio_write(s->pb, buf, TS_PACKET_SIZE);
     }

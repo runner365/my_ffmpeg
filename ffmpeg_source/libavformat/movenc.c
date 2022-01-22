@@ -116,24 +116,6 @@ static const AVClass flavor ## _muxer_class = {\
 
 static int get_moov_size(AVFormatContext *s);
 
-static void av_trace_data(const unsigned char* data, int len, const char* dscr) {
-    char print_data[10*1024];
-    size_t print_len = 0;
-
-    print_len += snprintf(print_data, sizeof(print_data), "%s:", dscr);
-    for (size_t index = 0; index < ((len > 256) ? 256 : (size_t)len); index++) {
-        if ((index%16) == 0) {
-            print_len += snprintf(print_data + print_len, sizeof(print_data) - print_len, "\r\n");
-        }
-        
-        print_len += snprintf(print_data + print_len, sizeof(print_data) - print_len,
-            " %02x", data[index]);
-    }
-    
-    printf("%s.\r\n", print_data);
-    return;
-}
-
 static int utf8len(const uint8_t *b)
 {
     int len = 0;
@@ -6381,16 +6363,12 @@ static int mov_write_header(AVFormatContext *s)
             if (st->codecpar->codec_id == AV_CODEC_ID_DVD_SUBTITLE)
                 mov_create_dvd_sub_decoder_specific_info(track, st);
             else if (!TAG_IS_AVCI(track->tag) && st->codecpar->codec_id != AV_CODEC_ID_DNXHD) {
-                char desc[256];
                 track->vos_len  = st->codecpar->extradata_size;
                 track->vos_data = av_malloc(track->vos_len);
                 if (!track->vos_data) {
                     return AVERROR(ENOMEM);
                 }
                 memcpy(track->vos_data, st->codecpar->extradata, track->vos_len);
-                snprintf(desc, sizeof(desc), "codec type:%d, len:%d",
-                    st->codecpar->codec_type, track->vos_len);
-                av_trace_data(st->codecpar->extradata, track->vos_len, desc);
             }
         }
 

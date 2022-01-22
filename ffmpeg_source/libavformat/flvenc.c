@@ -127,20 +127,6 @@ typedef struct FLVStreamContext {
     int64_t last_ts;    ///< last timestamp for each stream
 } FLVStreamContext;
 
-static void trace_data(const unsigned char* data, int len, char* print_data) {
-    size_t print_len = 0;
-
-    for (size_t index = 0; index < ((len > 64) ? 64 : (size_t)len); index++) {
-        if ((index%16) == 0) {
-            print_len += sprintf(print_data + print_len, "\r\n");
-        }
-        
-        print_len += sprintf(print_data + print_len, " %02x", data[index]);
-    }
-    
-    return;
-}
-
 static int get_audio_flags(AVFormatContext *s, AVCodecParameters *par)
 {
     int flags = (par->bits_per_coded_sample == 16) ? FLV_SAMPLESSIZE_16BIT
@@ -523,7 +509,6 @@ static void flv_write_codec_header(AVFormatContext* s, AVCodecParameters* par, i
         avio_wb24(pb, 0); // streamid
         pos = avio_tell(pb);
         if (par->codec_id == AV_CODEC_ID_AAC) {
-            char print_data[8192];
             avio_w8(pb, get_audio_flags(s, par));
             avio_w8(pb, 0); // AAC sequence header
 
@@ -555,18 +540,11 @@ static void flv_write_codec_header(AVFormatContext* s, AVCodecParameters* par, i
                 av_log(s, AV_LOG_WARNING, "AAC sequence header: %02x %02x.\n",
                         data[0], data[1]);
             }
-            trace_data(par->extradata, par->extradata_size, print_data);
-            av_log(s, AV_LOG_WARNING, "+++++++ AAC sequence header data:\n%s\n", print_data);
             avio_write(pb, par->extradata, par->extradata_size);
         } else if (par->codec_id == AV_CODEC_ID_OPUS) {
-            char print_data[8192];
             avio_w8(pb, get_audio_flags(s, par));
             avio_w8(pb, 0); // opus sequence header
 
-            trace_data(par->extradata, par->extradata_size, print_data);
-            av_log(s, AV_LOG_WARNING, "+++++++ OPUS sequence header 0x%02x %02x\n",
-                (uint8_t)get_audio_flags(s, par), 0);
-            av_log(s, AV_LOG_WARNING, "+++++++ OPUS sequence header data:\n%s\n", print_data);
             avio_write(pb, par->extradata, par->extradata_size);
         }else {
             avio_w8(pb, par->codec_tag | FLV_FRAME_KEY); // flags

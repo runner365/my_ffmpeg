@@ -782,7 +782,8 @@ static const StreamType REGD_types[] = {
     { MKTAG('I', 'D', '3', ' '), AVMEDIA_TYPE_DATA,  AV_CODEC_ID_TIMED_ID3 },
     { MKTAG('V', 'C', '-', '1'), AVMEDIA_TYPE_VIDEO, AV_CODEC_ID_VC1   },
     { MKTAG('O', 'p', 'u', 's'), AVMEDIA_TYPE_AUDIO, AV_CODEC_ID_OPUS  },
-    { MKTAG('V', 'p', '8', ' '), AVMEDIA_TYPE_VIDEO, AV_CODEC_ID_VP8   },
+    { MKTAG('V', 'p', '8', '0'), AVMEDIA_TYPE_VIDEO, AV_CODEC_ID_VP8   },
+    { MKTAG('V', 'p', '9', '0'), AVMEDIA_TYPE_VIDEO, AV_CODEC_ID_VP9   },
     { 0 },
 };
 

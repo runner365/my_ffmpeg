@@ -45,24 +45,6 @@ static const uint16_t opus_frame_duration[32] = {
     120, 240,  480,  960,
 };
 
-static void av_trace_data(const unsigned char* data, int len, const char* dscr) {
-    char print_data[10*1024];
-    size_t print_len = 0;
-
-    print_len += snprintf(print_data, sizeof(print_data), "%s:", dscr);
-    for (size_t index = 0; index < ((len > 64) ? 64 : (size_t)len); index++) {
-        if ((index%16) == 0) {
-            print_len += snprintf(print_data + print_len, sizeof(print_data) - print_len, "\r\n");
-        }
-        
-        print_len += snprintf(print_data + print_len, sizeof(print_data) - print_len,
-            " %02x", data[index]);
-    }
-    
-    av_log(NULL, AV_LOG_INFO, "%s.\r\n", print_data);
-    return;
-}
-
 /**
  * Read a 1- or 2-byte frame length
  */
@@ -340,7 +322,6 @@ av_cold int ff_opus_parse_extradata(AVCodecContext *avctx,
     version = extradata[8];
     if (version > 15) {
         avpriv_request_sample(avctx, "Extradata version %d", version);
-        av_trace_data(extradata, extradata_size, "opus extradata");
         return AVERROR_PATCHWELCOME;
     }
 
